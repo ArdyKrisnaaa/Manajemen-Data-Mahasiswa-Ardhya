@@ -192,6 +192,69 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 .empty{text-align:center;padding:44px;color:var(--tx3)}
 .tbl-ft{padding:9px 14px;font-size:11px;color:var(--tx3);border-top:1px solid var(--bd)}
 .dg2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+
+.menu-btn{
+  display:none;
+}
+
+@media (max-width:768px){
+
+  .menu-btn{
+    display:block;
+    background:var(--ac);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    width:40px;
+    height:40px;
+    font-size:20px;
+    cursor:pointer;
+  }
+
+  .sb{
+    position:fixed;
+    left:-220px;
+    top:0;
+    height:100%;
+    z-index:999;
+    transition:.3s;
+  }
+
+  .sb.show{
+    left:0;
+  }
+
+  .sg,
+  .ag,
+  .dg2,
+  .fg,
+  .rdg{
+    grid-template-columns:1fr;
+  }
+
+  .content{
+    padding:12px;
+  }
+
+  .tb{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .tb input,
+  .tb select,
+  .tb button{
+    width:100%;
+  }
+
+  .tw{
+    overflow-x:auto;
+  }
+
+  table{
+    min-width:700px;
+  }
+}
 </style>
 </head>
 <body>
@@ -257,7 +320,8 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
   <main class="main">
     <div class="topbar">
-      <div class="tb-ti" id="pgtit">Dashboard</div>
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
+  <div class="tb-ti" id="pgtit">Dashboard</div>
       <div class="tb-mt" id="pgmt"></div>
     </div>
     <div class="content">
@@ -868,6 +932,10 @@ function showTC(tab) {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 document.getElementById('l-user').focus();
+  function toggleMenu(){
+    
+  document.querySelector('.sb').classList.toggle('show');
+}
 </script>
 </body>
 </html>
