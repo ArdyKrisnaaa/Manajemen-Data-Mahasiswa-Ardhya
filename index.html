@@ -692,6 +692,10 @@ var Search = {
 var editNim=null,curAlgo='bubble',sMode='linear',mCb=null;
 
 function gP(id,navEl) {
+
+  if(window.innerWidth <= 768){
+  document.querySelector('.sb').classList.remove('show');
+}
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
   document.getElementById('panel-'+id).classList.add('active');
   document.querySelectorAll('.nav-it').forEach(function(n){n.classList.remove('active');});
@@ -933,9 +937,26 @@ function showTC(tab) {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 document.getElementById('l-user').focus();
   function toggleMenu(){
-    
   document.querySelector('.sb').classList.toggle('show');
 }
+
+document.addEventListener('click', function(e){
+
+  const sidebar = document.querySelector('.sb');
+  const button = document.querySelector('.menu-btn');
+
+  if(window.innerWidth <= 768){
+
+    if(
+      sidebar.classList.contains('show') &&
+      !sidebar.contains(e.target) &&
+      !button.contains(e.target)
+    ){
+      sidebar.classList.remove('show');
+    }
+
+  }
+});
 </script>
 </body>
 </html>
