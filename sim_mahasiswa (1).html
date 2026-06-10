@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SIM Mahasiswa</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2435;--bg4:#252d42;
+  --ac:#7c6af7;--ac2:#a594ff;--ac3:#5548d9;
+  --tl:#2dd4bf;--co:#f87171;--am:#fbbf24;--gr:#4ade80;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.13);
+  --tx:#e2e8f0;--tx2:#94a3b8;--tx3:#4a5568;
+  --r:10px;--rl:14px;
+  --fn:'Segoe UI',system-ui,sans-serif;
+  --mo:'Cascadia Code','Consolas','Courier New',monospace;
+}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);font-size:14px;min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:99px}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+#login-screen.hidden{display:none}
+.login-box{background:var(--bg2);border:1px solid var(--bd2);border-radius:20px;padding:38px 40px;width:380px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.5);animation:fadeUp .3s ease}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--ac),var(--ac3));border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:12px}
+.login-title{font-size:20px;font-weight:700}
+.login-sub{font-size:13px;color:var(--tx3);margin-top:4px}
+.lf-group{margin-bottom:16px}
+.lf-group label{display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:6px}
+.lf-group input{width:100%;height:42px;background:var(--bg3);border:1.5px solid var(--bd2);border-radius:10px;padding:0 14px;font-size:14px;color:var(--tx);font-family:var(--fn);outline:none;transition:border-color .2s,box-shadow .2s}
+.lf-group input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(124,106,247,.15)}
+.lf-group input.l-inv{border-color:var(--co);box-shadow:0 0 0 3px rgba(248,113,113,.15)}
+.login-err{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--co);border-radius:10px;padding:10px 14px;font-size:13px;display:none;align-items:center;gap:8px;margin-bottom:14px}
+.login-err.show{display:flex}
+.login-err-icon{font-size:18px;flex-shrink:0}
+.btn-login{width:100%;height:44px;background:linear-gradient(135deg,var(--ac),var(--ac3));border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;font-family:var(--fn);cursor:pointer;transition:opacity .2s,transform .1s;margin-top:4px}
+.btn-login:hover{opacity:.9}
+.btn-login:active{transform:scale(.98)}
+.login-hint{text-align:center;font-size:11px;color:var(--tx3);margin-top:18px;line-height:1.6}
+.login-hint span{color:var(--ac2);font-family:var(--mo)}
+.login-attempts{font-size:12px;color:var(--am);text-align:center;margin-top:10px;display:none}
+.login-attempts.show{display:block}
+.shake{animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* ── APP ── */
+.app{display:flex;height:100vh;overflow:hidden}
+.sb{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow-y:auto}
+.sb-brand{padding:20px 18px 16px;border-bottom:1px solid var(--bd)}
+.sb-ic{width:38px;height:38px;background:linear-gradient(135deg,var(--ac),var(--ac3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:10px}
+.sb-t{font-size:13px;font-weight:600}
+.sb-s{font-size:11px;color:var(--tx3);margin-top:2px}
+.nav-sec{font-size:10px;font-weight:600;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;padding:16px 18px 5px}
+.nav-it{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;font-size:13px;color:var(--tx2);border-left:2px solid transparent;transition:all .15s;user-select:none}
+.nav-it:hover{color:var(--tx);background:rgba(255,255,255,.03)}
+.nav-it.active{color:var(--ac2);background:rgba(124,106,247,.1);border-left-color:var(--ac);font-weight:500}
+.sb-ft{margin-top:auto;padding:14px 18px;border-top:1px solid var(--bd);font-size:11px;color:var(--tx3)}
+.db-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);color:var(--tl);font-size:11px;padding:3px 9px;border-radius:99px;margin-top:5px}
+.sb-user{display:flex;align-items:center;gap:10px;padding:12px 18px;border-top:1px solid var(--bd);background:rgba(124,106,247,.05)}
+.sb-user-av{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--ac),var(--ac3));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-user-info{flex:1;min-width:0}
+.sb-user-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-role{font-size:10px;color:var(--tx3)}
+.btn-logout{background:transparent;border:none;color:var(--tx3);cursor:pointer;padding:4px;font-size:15px;border-radius:6px;transition:color .15s,background .15s;flex-shrink:0}
+.btn-logout:hover{color:var(--co);background:rgba(248,113,113,.1)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:12px;padding:13px 22px;border-bottom:1px solid var(--bd);background:var(--bg2);flex-shrink:0}
+.tb-ti{font-size:15px;font-weight:600;flex:1}
+.tb-mt{font-size:12px;color:var(--tx3);font-family:var(--mo)}
+.content{flex:1;overflow-y:auto;padding:22px}
+.panel{display:none;animation:fadeUp .2s ease}
+.panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.sc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rl);padding:14px 16px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--cc,var(--ac));border-radius:2px 2px 0 0}
+.sc-ic{font-size:20px;margin-bottom:8px;color:var(--cc,var(--ac))}
+.sc-lb{font-size:10px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.sc-v{font-size:24px;font-weight:700}
+.sc-s{font-size:11px;color:var(--tx3);margin-top:2px}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden}
+.card-hdr{padding:12px 16px;border-bottom:1px solid var(--bd);font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;color:var(--tx2)}
+.tb{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--bg2)}
+.tb input,.tb select{height:32px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);padding:0 10px;font-size:12px;color:var(--tx);font-family:var(--fn);outline:none;transition:border-color .15s}
+.tb input:focus,.tb select:focus{border-color:var(--ac)}
+.tb input{flex:1;min-width:150px}
+.btn{height:32px;padding:0 13px;border-radius:var(--r);font-size:12px;font-family:var(--fn);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border:1px solid var(--bd2);background:transparent;color:var(--tx2);transition:all .15s;font-weight:500;user-select:none}
+.btn:hover{background:var(--bg4);color:var(--tx)}
+.btn:active{transform:scale(.97)}
+.btn-p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.btn-p:hover{background:var(--ac2);border-color:var(--ac2);color:#fff}
+.btn-sm{height:27px;padding:0 9px;font-size:11px}
+.btn-d{color:var(--co);border-color:rgba(248,113,113,.2)}
+.btn-d:hover{background:rgba(248,113,113,.1)}
+.btn-t{color:var(--tl);border-color:rgba(45,212,191,.2)}
+.btn-t:hover{background:rgba(45,212,191,.1)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:9px 14px;font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--bd);background:var(--bg3);white-space:nowrap}
+tbody td{padding:9px 14px;border-bottom:1px solid var(--bd);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(255,255,255,.02)}
+.nc{font-family:var(--mo);font-size:12px;color:var(--ac2)}
+.ib{display:flex;align-items:center;gap:7px}
+.it{width:48px;height:4px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.if{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ac3),var(--ac2))}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500}
+.b-pu{background:rgba(124,106,247,.15);color:var(--ac2)}
+.b-te{background:rgba(45,212,191,.12);color:var(--tl)}
+.b-am{background:rgba(251,191,36,.12);color:var(--am)}
+.b-co{background:rgba(248,113,113,.12);color:var(--co)}
+.b-gr{background:rgba(255,255,255,.07);color:var(--tx2)}
+.fw{max-width:540px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.fi{display:flex;flex-direction:column;gap:4px}
+.fi.full{grid-column:1/-1}
+.fi label{font-size:12px;font-weight:500;color:var(--tx2)}
+.fi input,.fi select{height:36px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);padding:0 11px;font-size:13px;color:var(--tx);font-family:var(--fn);outline:none;width:100%;transition:border-color .15s,box-shadow .15s}
+.fi input:focus,.fi select:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(124,106,247,.13)}
+.fi input.inv{border-color:var(--co)}
+.fi input.ok{border-color:var(--gr)}
+.er{font-size:11px;color:var(--co);min-height:14px}
+.req{color:var(--co);margin-left:2px}
+.al{padding:10px 14px;border-radius:var(--r);font-size:13px;margin-bottom:14px;display:none;align-items:center;gap:8px;border:1px solid}
+.al.show{display:flex}
+.al-ok{background:rgba(74,222,128,.1);color:var(--gr);border-color:rgba(74,222,128,.25)}
+.al-er{background:rgba(248,113,113,.1);color:var(--co);border-color:rgba(248,113,113,.25)}
+.mbs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.mb{height:32px;padding:0 13px;border-radius:var(--r);font-size:12px;font-family:var(--fn);cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--tx2);font-weight:500;transition:all .15s}
+.mb:hover{background:var(--bg3)}
+.mb.active{background:rgba(124,106,247,.15);border-color:var(--ac);color:var(--ac2)}
+.sd{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.7}
+.sd b{color:var(--ac2)}
+.si{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.si input,.si select{height:34px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);padding:0 10px;font-size:13px;color:var(--tx);font-family:var(--fn);outline:none;transition:border-color .15s}
+.si input:focus,.si select:focus{border-color:var(--ac)}
+.si input{flex:1;min-width:160px}
+.rb{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rl);padding:14px;min-height:80px;margin-top:12px}
+.rm{font-size:11px;color:var(--tx3);margin-bottom:10px;font-family:var(--mo)}
+.rc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:13px;margin-bottom:9px}
+.rc:last-child{margin-bottom:0}
+.rch{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.rdg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.di{background:var(--bg3);border-radius:8px;padding:7px 10px}
+.di .dl{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em}
+.di .dv{font-size:13px;font-weight:500;margin-top:2px}
+.ag{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.ac{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:11px;cursor:pointer;transition:all .15s;user-select:none}
+.ac:hover{border-color:var(--ac);background:rgba(124,106,247,.05)}
+.ac.sel{border-color:var(--ac);background:rgba(124,106,247,.1)}
+.ac h4{font-size:13px;font-weight:600}
+.ac p{font-size:11px;color:var(--tx3);margin-top:2px}
+.ac-c{font-size:10px;font-family:var(--mo);color:var(--ac2);margin-top:5px;font-weight:500}
+.sc2{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.sc2 select{height:32px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);padding:0 9px;font-size:12px;color:var(--tx);font-family:var(--fn);outline:none}
+.bw{margin-top:14px}
+.bt{font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
+.br{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bn{font-size:12px;color:var(--tx2);width:130px;flex-shrink:0}
+.bw2{flex:1;height:16px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.bb{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ac3),var(--ac));transition:width .6s cubic-bezier(.22,.68,0,1.2)}
+.bb.fast{background:linear-gradient(90deg,#0f766e,var(--tl))}
+.bti{font-size:12px;font-family:var(--mo);width:80px;text-align:right}
+.tc-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tc-tab{height:30px;padding:0 13px;border-radius:var(--r);font-size:12px;font-family:var(--fn);cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--tx2);font-weight:500;transition:all .15s}
+.tc-tab:hover{background:var(--bg3)}
+.tc-tab.active{background:rgba(124,106,247,.15);border-color:var(--ac);color:var(--ac2)}
+.tc-t{width:100%;border-collapse:collapse;font-size:12px}
+.tc-t th{text-align:left;padding:9px 12px;font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--bd);background:var(--bg3)}
+.tc-t td{padding:9px 12px;border-bottom:1px solid var(--bd)}
+.tc-t tr:last-child td{border-bottom:none}
+.tc-gd{color:var(--gr);font-family:var(--mo);font-weight:500}
+.tc-md{color:var(--am);font-family:var(--mo);font-weight:500}
+.tc-bd{color:var(--co);font-family:var(--mo);font-weight:500}
+.tc-leg{display:flex;gap:16px;margin-top:12px;padding:10px 14px;font-size:11px}
+.tc-leg span{display:flex;align-items:center;gap:5px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:100}
+.ov.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--rl);padding:22px 26px;max-width:350px;width:90%;box-shadow:0 4px 24px rgba(0,0,0,.4);animation:fadeUp .2s ease}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:7px}
+.modal p{font-size:13px;color:var(--tx2);margin-bottom:18px;line-height:1.6}
+.modal-act{display:flex;gap:8px;justify-content:flex-end}
+.tw2{position:fixed;bottom:22px;right:22px;z-index:200;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r);padding:11px 15px;font-size:13px;color:var(--tx);display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.4);animation:tsIn .25s ease;min-width:230px;max-width:320px}
+.toast.tok{border-left:3px solid var(--gr)}
+.toast.ter{border-left:3px solid var(--co)}
+@keyframes tsIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes tsOut{from{opacity:1}to{opacity:0;transform:translateX(16px)}}
+.empty{text-align:center;padding:44px;color:var(--tx3)}
+.tbl-ft{padding:9px 14px;font-size:11px;color:var(--tx3);border-top:1px solid var(--bd)}
+.dg2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN SCREEN ══════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box" id="login-box">
+    <div class="login-logo">
+      <div class="login-icon">🎓</div>
+      <div class="login-title">SIM Mahasiswa</div>
+      <div class="login-sub">Sistem Informasi Akademik</div>
+    </div>
+    <div class="login-err" id="login-err">
+      <span class="login-err-icon">⚠️</span>
+      <span id="login-err-msg">Username atau password salah.</span>
+    </div>
+    <div class="lf-group">
+      <label>Username</label>
+      <input type="text" id="l-user" placeholder="Masukkan username" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="lf-group">
+      <label>Password</label>
+      <input type="password" id="l-pass" placeholder="Masukkan password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-attempts" id="login-attempts"></div>
+    <button class="btn-login" onclick="doLogin()">Masuk</button>
+    <div class="login-hint">
+      Demo — user: <span>admin</span> / pass: <span>admin123</span><br>
+      atau user: <span>dosen</span> / pass: <span>dosen123</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══════════════════════════════════════════════ -->
+<div class="app" id="app-screen" style="display:none">
+  <aside class="sb">
+    <div class="sb-brand">
+      <div class="sb-ic">🎓</div>
+      <div class="sb-t">SIM Mahasiswa</div>
+      <div class="sb-s">Sistem Informasi Akademik</div>
+    </div>
+    <div class="nav-sec">Data</div>
+    <div class="nav-it active" onclick="gP('dashboard',this)"><span>📋</span><span>Dashboard</span></div>
+    <div class="nav-it" onclick="gP('daftar',this)"><span>👥</span><span>Daftar Mahasiswa</span></div>
+    <div class="nav-it" onclick="gP('tambah',this)"><span>➕</span><span>Tambah Baru</span></div>
+    <div class="nav-sec">Algoritma</div>
+    <div class="nav-it" onclick="gP('cari',this)"><span>🔍</span><span>Pencarian</span></div>
+    <div class="nav-it" onclick="gP('sort',this)"><span>🔄</span><span>Pengurutan</span></div>
+    <div class="nav-it" onclick="gP('tc',this)"><span>⏱</span><span>Time Complexity</span></div>
+    <div class="sb-ft">
+      <div>Data tersimpan otomatis</div>
+      <div class="db-badge">💾 <span id="sbn">0</span> mahasiswa</div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-user-av" id="sb-av">A</div>
+      <div class="sb-user-info">
+        <div class="sb-user-name" id="sb-uname">Admin</div>
+        <div class="sb-user-role" id="sb-role">Administrator</div>
+      </div>
+      <button class="btn-logout" title="Keluar" onclick="doLogout()">⎋</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="tb-ti" id="pgtit">Dashboard</div>
+      <div class="tb-mt" id="pgmt"></div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="sg" id="sg"></div>
+        <div class="dg2">
+          <div class="card">
+            <div class="card-hdr">👥 Mahasiswa Terbaru</div>
+            <div class="tw"><table>
+              <thead><tr><th>NIM</th><th>Nama</th><th>IPK</th><th>Status</th></tr></thead>
+              <tbody id="tb-rec"></tbody>
+            </table></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr">📈 Distribusi Jurusan</div>
+            <div style="padding:14px 16px" id="jbar"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DAFTAR -->
+      <div class="panel" id="panel-daftar">
+        <div class="card">
+          <div class="tb">
+            <input type="text" id="tq" placeholder="Cari NIM, nama, jurusan..." oninput="rT()">
+            <select id="ts" onchange="rT()">
+              <option value="nim">Urut: NIM</option>
+              <option value="nama">Urut: Nama</option>
+              <option value="ipk">Urut: IPK</option>
+              <option value="semester">Urut: Semester</option>
+            </select>
+            <select id="td" onchange="rT()">
+              <option value="asc">↑ Naik</option>
+              <option value="desc">↓ Turun</option>
+            </select>
+            <button class="btn btn-p" onclick="gTambah()">➕ Tambah</button>
+            <button class="btn btn-t" onclick="expCSV()">⬇ CSV</button>
+          </div>
+          <div class="tw"><table>
+            <thead><tr><th>#</th><th>NIM</th><th>Nama</th><th>Jurusan</th><th>Sem</th><th>IPK</th><th>T.Masuk</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="tbm"></tbody>
+          </table></div>
+          <div id="tbe" class="empty" style="display:none"><div style="font-size:32px;margin-bottom:8px">📄</div>Belum ada data mahasiswa</div>
+          <div class="tbl-ft" id="tbf"></div>
+        </div>
+      </div>
+
+      <!-- TAMBAH / EDIT -->
+      <div class="panel" id="panel-tambah">
+        <div class="fw">
+          <div class="al al-ok" id="alok">✅ <span id="alokm"></span></div>
+          <div class="al al-er" id="aler">❌ <span id="alerm"></span></div>
+          <div class="card" style="padding:18px 20px">
+            <div class="fg">
+              <div class="fi">
+                <label>NIM<span class="req">*</span></label>
+                <input type="text" id="fnim" placeholder="12345678" maxlength="8" oninput="vf('nim')">
+                <span class="er" id="enim"></span>
+              </div>
+              <div class="fi">
+                <label>Tahun Masuk<span class="req">*</span></label>
+                <input type="number" id="ftah" placeholder="2022" min="2000" max="2025" oninput="vf('tahun')">
+                <span class="er" id="etah"></span>
+              </div>
+              <div class="fi full">
+                <label>Nama Lengkap<span class="req">*</span></label>
+                <input type="text" id="fnam" placeholder="Andi Pratama" oninput="vf('nama')">
+                <span class="er" id="enam"></span>
+              </div>
+              <div class="fi">
+                <label>Jurusan<span class="req">*</span></label>
+                <select id="fjur" onchange="vf('jurusan')">
+                  <option value="">-- Pilih Jurusan --</option>
+                  <option>Teknik Informatika</option><option>Sistem Informasi</option>
+                  <option>Teknik Elektro</option><option>Teknik Mesin</option>
+                  <option>Manajemen</option><option>Akuntansi</option>
+                  <option>Hukum</option><option>Psikologi</option>
+                  <option>Kedokteran</option><option>Farmasi</option>
+                </select>
+                <span class="er" id="ejur"></span>
+              </div>
+              <div class="fi">
+                <label>Semester<span class="req">*</span></label>
+                <select id="fsem" onchange="vf('semester')">
+                  <option value="">-- Pilih --</option>
+                  <option>1</option><option>2</option><option>3</option><option>4</option>
+                  <option>5</option><option>6</option><option>7</option><option>8</option>
+                  <option>9</option><option>10</option><option>11</option><option>12</option>
+                </select>
+                <span class="er" id="esem"></span>
+              </div>
+              <div class="fi">
+                <label>IPK<span class="req">*</span></label>
+                <input type="number" id="fipk" placeholder="3.75" min="0" max="4" step="0.01" oninput="vf('ipk')">
+                <span class="er" id="eipk"></span>
+              </div>
+              <div class="fi">
+                <label>Telepon<span class="req">*</span></label>
+                <input type="text" id="ftelp" placeholder="081234567890" oninput="vf('telp')">
+                <span class="er" id="etelp"></span>
+              </div>
+              <div class="fi full">
+                <label>Email<span class="req">*</span></label>
+                <input type="text" id="feml" placeholder="nama@student.ac.id" oninput="vf('email')">
+                <span class="er" id="eeml"></span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-p" id="btsub" onclick="submitForm()">💾 Simpan</button>
+              <button class="btn" onclick="resetForm()">↺ Reset</button>
+              <button class="btn" onclick="gP('daftar',null)">Batal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PENCARIAN -->
+      <div class="panel" id="panel-cari">
+        <div class="mbs">
+          <button class="mb active" id="mb-linear" onclick="setMode('linear')">Linear Search</button>
+          <button class="mb" id="mb-sequential" onclick="setMode('sequential')">Sequential Search</button>
+          <button class="mb" id="mb-binary" onclick="setMode('binary')">Binary Search</button>
+          <button class="mb" id="mb-ipk" onclick="setMode('ipk')">Rentang IPK</button>
+        </div>
+        <div class="sd" id="sdsc"></div>
+        <div class="si" id="sinp"></div>
+        <button class="btn btn-p" onclick="doSearch()">🔍 Cari Sekarang</button>
+        <div class="rb" id="rbox">
+          <div style="text-align:center;padding:20px;color:var(--tx3)"><div style="font-size:28px;margin-bottom:8px">🔍</div>Hasil pencarian akan tampil di sini</div>
+        </div>
+      </div>
+
+      <!-- PENGURUTAN -->
+      <div class="panel" id="panel-sort">
+        <div class="ag">
+          <div class="ac sel" onclick="selA(this,'bubble')"><h4>Bubble Sort</h4><p>Swap berdekatan</p><div class="ac-c">O(n²)</div></div>
+          <div class="ac" onclick="selA(this,'insertion')"><h4>Insertion Sort</h4><p>Sisip satu-satu</p><div class="ac-c">O(n²)</div></div>
+          <div class="ac" onclick="selA(this,'selection')"><h4>Selection Sort</h4><p>Pilih minimum</p><div class="ac-c">O(n²)</div></div>
+          <div class="ac" onclick="selA(this,'merge')"><h4>Merge Sort</h4><p>Divide &amp; Conquer</p><div class="ac-c">O(n log n)</div></div>
+          <div class="ac" onclick="selA(this,'shell')"><h4>Shell Sort</h4><p>Gap Knuth</p><div class="ac-c">O(n^1.5)</div></div>
+        </div>
+        <div class="sc2">
+          <select id="sk"><option value="nim">Kunci: NIM</option><option value="nama">Kunci: Nama</option><option value="ipk">Kunci: IPK</option><option value="semester">Kunci: Semester</option><option value="tahun_masuk">Kunci: Tahun Masuk</option></select>
+          <select id="sdir"><option value="asc">↑ Naik</option><option value="desc">↓ Turun</option></select>
+          <button class="btn btn-p" onclick="doSort()">🔄 Urutkan</button>
+          <button class="btn btn-t" onclick="doBench()">📊 Benchmark</button>
+        </div>
+        <div id="sres"></div>
+        <div id="bwrap" style="display:none">
+          <div class="bw">
+            <div class="bt">Benchmark — rata-rata 6 run · n=<span id="bnn">0</span></div>
+            <div id="bbars"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIME COMPLEXITY -->
+      <div class="panel" id="panel-tc">
+        <div class="tc-tabs">
+          <button class="tc-tab active" id="tct-crud" onclick="showTC('crud')">CRUD</button>
+          <button class="tc-tab" id="tct-search" onclick="showTC('search')">Pencarian</button>
+          <button class="tc-tab" id="tct-sort" onclick="showTC('sort')">Pengurutan</button>
+          <button class="tc-tab" id="tct-io" onclick="showTC('io')">File I/O</button>
+        </div>
+        <div class="card">
+          <div class="tw" id="tcc"></div>
+          <div class="tc-leg">
+            <span><span class="dot" style="background:var(--gr)"></span>Efisien</span>
+            <span><span class="dot" style="background:var(--am)"></span>Sedang</span>
+            <span><span class="dot" style="background:var(--co)"></span>Kurang efisien</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="ov" id="ov">
+  <div class="modal">
+    <h3 id="mt">Konfirmasi</h3>
+    <p id="mp">Yakin?</p>
+    <div class="modal-act">
+      <button class="btn" onclick="closeM()">Batal</button>
+      <button class="btn btn-d" id="mok">🗑 Hapus</button>
+    </div>
+  </div>
+</div>
+<div class="tw2" id="tw2"></div>
+
+<script>
+// ── USERS ────────────────────────────────────────────────────────────────────
+var USERS = {
+  admin : { password:'admin123', role:'Administrator', display:'Admin' },
+  dosen : { password:'dosen123', role:'Dosen',         display:'Dosen' }
+};
+var currentUser = null;
+var loginAttempts = 0;
+var MAX_ATTEMPTS = 5;
+
+function doLogin() {
+  var u = document.getElementById('l-user').value.trim();
+  var p = document.getElementById('l-pass').value;
+  var errEl = document.getElementById('login-err');
+  var errMsg = document.getElementById('login-err-msg');
+  var attEl = document.getElementById('login-attempts');
+
+  // Bersihkan state lama
+  errEl.classList.remove('show');
+  document.getElementById('l-user').classList.remove('l-inv');
+  document.getElementById('l-pass').classList.remove('l-inv');
+
+  if (!u || !p) {
+    errMsg.textContent = 'Username dan password tidak boleh kosong.';
+    errEl.classList.add('show');
+    document.getElementById('login-box').classList.add('shake');
+    setTimeout(function(){ document.getElementById('login-box').classList.remove('shake'); }, 400);
+    return;
+  }
+
+  var user = USERS[u.toLowerCase()];
+
+  if (!user || user.password !== p) {
+    loginAttempts++;
+    var sisa = MAX_ATTEMPTS - loginAttempts;
+
+    if (u && !USERS[u.toLowerCase()]) {
+      errMsg.textContent = 'Username "' + u + '" tidak ditemukan.';
+      document.getElementById('l-user').classList.add('l-inv');
+    } else if (user && user.password !== p) {
+      errMsg.textContent = 'Password salah. Periksa kembali password Anda.';
+      document.getElementById('l-pass').classList.add('l-inv');
+      document.getElementById('l-pass').value = '';
+    } else {
+      errMsg.textContent = 'Username atau password salah.';
+      document.getElementById('l-user').classList.add('l-inv');
+      document.getElementById('l-pass').classList.add('l-inv');
+    }
+
+    errEl.classList.add('show');
+    document.getElementById('login-box').classList.add('shake');
+    setTimeout(function(){ document.getElementById('login-box').classList.remove('shake'); }, 400);
+
+    if (loginAttempts >= 2 && sisa > 0) {
+      attEl.textContent = '⚠ Sisa percobaan: ' + sisa + ' kali';
+      attEl.classList.add('show');
+    } else if (sisa <= 0) {
+      attEl.textContent = '🔒 Terlalu banyak percobaan. Refresh halaman untuk mencoba lagi.';
+      attEl.classList.add('show');
+      document.getElementById('l-user').disabled = true;
+      document.getElementById('l-pass').disabled = true;
+      document.querySelector('.btn-login').disabled = true;
+      document.querySelector('.btn-login').style.opacity = '0.4';
+    }
+    return;
+  }
+
+  // Login berhasil
+  currentUser = { username: u.toLowerCase(), ...user };
+  loginAttempts = 0;
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app-screen').style.display = 'flex';
+  document.getElementById('sb-uname').textContent = user.display;
+  document.getElementById('sb-role').textContent = user.role;
+  document.getElementById('sb-av').textContent = user.display.charAt(0).toUpperCase();
+  initApp();
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('l-user').value = '';
+  document.getElementById('l-pass').value = '';
+  document.getElementById('l-user').disabled = false;
+  document.getElementById('l-pass').disabled = false;
+  document.getElementById('login-err').classList.remove('show');
+  document.getElementById('login-attempts').classList.remove('show');
+  document.getElementById('l-user').classList.remove('l-inv');
+  document.getElementById('l-pass').classList.remove('l-inv');
+  var btn = document.querySelector('.btn-login');
+  btn.disabled = false; btn.style.opacity = '';
+  loginAttempts = 0;
+}
+
+// ── DATA (localStorage) ──────────────────────────────────────────────────────
+var DB = [];
+var STORAGE_KEY = 'sim_mahasiswa_data';
+
+function simpan() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(DB)); } catch(e) {}
+}
+function muat() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) DB = JSON.parse(raw);
+  } catch(e) { DB = []; }
+}
+
+var DEMO_DATA = [
+  {nim:'22410001',nama:'Andi Pratama',jurusan:'Teknik Informatika',semester:6,ipk:3.75,tahun_masuk:2022,telepon:'081234567890',email:'andi@student.ac.id',tgl_daftar:'01 Jan 2022'},
+  {nim:'22410002',nama:'Budi Santoso',jurusan:'Sistem Informasi',semester:6,ipk:3.45,tahun_masuk:2022,telepon:'082345678901',email:'budi@student.ac.id',tgl_daftar:'01 Jan 2022'},
+  {nim:'22410003',nama:'Citra Dewi',jurusan:'Teknik Informatika',semester:6,ipk:3.90,tahun_masuk:2022,telepon:'083456789012',email:'citra@student.ac.id',tgl_daftar:'01 Jan 2022'},
+  {nim:'21310001',nama:'Dodi Firmansyah',jurusan:'Teknik Elektro',semester:8,ipk:2.80,tahun_masuk:2021,telepon:'084567890123',email:'dodi@student.ac.id',tgl_daftar:'01 Jan 2021'},
+  {nim:'21310002',nama:'Eka Putri',jurusan:'Manajemen',semester:8,ipk:3.20,tahun_masuk:2021,telepon:'085678901234',email:'eka@student.ac.id',tgl_daftar:'01 Jan 2021'},
+  {nim:'20210001',nama:'Fajar Nugroho',jurusan:'Akuntansi',semester:10,ipk:3.55,tahun_masuk:2020,telepon:'086789012345',email:'fajar@student.ac.id',tgl_daftar:'01 Jan 2020'},
+  {nim:'20210002',nama:'Gita Rahayu',jurusan:'Psikologi',semester:10,ipk:3.80,tahun_masuk:2020,telepon:'087890123456',email:'gita@student.ac.id',tgl_daftar:'01 Jan 2020'},
+  {nim:'23510001',nama:'Hendra Wijaya',jurusan:'Teknik Mesin',semester:4,ipk:2.95,tahun_masuk:2023,telepon:'088901234567',email:'hendra@student.ac.id',tgl_daftar:'01 Jan 2023'},
+  {nim:'23510002',nama:'Indah Lestari',jurusan:'Hukum',semester:4,ipk:3.65,tahun_masuk:2023,telepon:'089012345678',email:'indah@student.ac.id',tgl_daftar:'01 Jan 2023'},
+  {nim:'24610001',nama:'Joko Susilo',jurusan:'Farmasi',semester:2,ipk:3.15,tahun_masuk:2024,telepon:'081123456789',email:'joko@student.ac.id',tgl_daftar:'01 Jan 2024'},
+];
+
+function initApp() {
+  muat();
+  if (!DB.length) { DB = DEMO_DATA.slice(); simpan(); }
+  updMeta();
+  gP('dashboard', document.querySelector('.nav-it'));
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+var RX = {
+  nim  : /^\d{8}$/,
+  nama : /^[A-Za-z\s'.]{3,50}$/,
+  ipk  : /^([0-3]\.\d{1,2}|4(\.0{1,2})?)$/,
+  telp : /^(\+62|62|0)[0-9]{9,12}$/,
+  email: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+  tahun: /^\d{4}$/
+};
+var ERRS = {nim:'Harus 8 digit angka',nama:'Hanya huruf & spasi, 3-50 karakter',ipk:'0.00 s/d 4.00',telp:'Format: 08xx/+62xx, 10-13 digit',email:'Contoh: nama@domain.com',tahun:'Tahun 2000-2025',jurusan:'Pilih jurusan',semester:'Pilih semester'};
+
+function status(ipk) {
+  if(ipk>=3.5) return{l:'Cumlaude',c:'b-pu'};
+  if(ipk>=3.0) return{l:'Sangat Memuaskan',c:'b-te'};
+  if(ipk>=2.5) return{l:'Memuaskan',c:'b-am'};
+  if(ipk>=2.0) return{l:'Cukup',c:'b-gr'};
+  return{l:'Perlu Perhatian',c:'b-co'};
+}
+function ib(ipk) {
+  return '<div class="ib"><div class="it"><div class="if" style="width:'+((ipk/4*100).toFixed(0))+'%"></div></div>'+parseFloat(ipk).toFixed(2)+'</div>';
+}
+function updMeta() {
+  document.getElementById('sbn').textContent = DB.length;
+  document.getElementById('pgmt').textContent = DB.length + ' mahasiswa';
+}
+
+// ── SORTING ──────────────────────────────────────────────────────────────────
+function kv(m,k){var v=m[k];return typeof v==='string'?v.toLowerCase():v;}
+var Sort = {
+  bubble:function(a,k,asc){var arr=[...a],n=arr.length;for(var i=0;i<n;i++){var sw=false;for(var j=0;j<n-i-1;j++){if(asc?kv(arr[j],k)>kv(arr[j+1],k):kv(arr[j],k)<kv(arr[j+1],k)){var t=arr[j];arr[j]=arr[j+1];arr[j+1]=t;sw=true;}}if(!sw)break;}return arr;},
+  insertion:function(a,k,asc){var arr=[...a];for(var i=1;i<arr.length;i++){var cur=arr[i],vc=kv(cur,k),j=i-1;while(j>=0&&(asc?kv(arr[j],k)>vc:kv(arr[j],k)<vc)){arr[j+1]=arr[j];j--;}arr[j+1]=cur;}return arr;},
+  selection:function(a,k,asc){var arr=[...a],n=arr.length;for(var i=0;i<n;i++){var idx=i;for(var j=i+1;j<n;j++)if(asc?kv(arr[j],k)<kv(arr[idx],k):kv(arr[j],k)>kv(arr[idx],k))idx=j;if(idx!==i){var t=arr[i];arr[i]=arr[idx];arr[idx]=t;}}return arr;},
+  merge:function(a,k,asc){if(a.length<=1)return[...a];var mid=a.length>>1,L=Sort.merge(a.slice(0,mid),k,asc),R=Sort.merge(a.slice(mid),k,asc),res=[],i=0,j=0;while(i<L.length&&j<R.length)(asc?kv(L[i],k)<=kv(R[j],k):kv(L[i],k)>=kv(R[j],k))?res.push(L[i++]):res.push(R[j++]);return res.concat(L.slice(i)).concat(R.slice(j));},
+  shell:function(a,k,asc){var arr=[...a],n=arr.length,gap=1;while(gap<Math.floor(n/3))gap=gap*3+1;while(gap>=1){for(var i=gap;i<n;i++){var tmp=arr[i],vt=kv(tmp,k),j=i;while(j>=gap&&(asc?kv(arr[j-gap],k)>vt:kv(arr[j-gap],k)<vt)){arr[j]=arr[j-gap];j-=gap;}arr[j]=tmp;}gap=Math.floor(gap/3);}return arr;}
+};
+
+// ── SEARCHING ────────────────────────────────────────────────────────────────
+var Search = {
+  linear:function(arr,q,field){var ql=q.toLowerCase().trim();return arr.filter(function(m){return String(m[field]||'').toLowerCase().indexOf(ql)>=0;});},
+  sequential:function(arr,nim){var t=nim.trim();for(var i=0;i<arr.length;i++)if(arr[i].nim===t)return arr[i];return null;},
+  binary:function(arr,nim){var sorted=Sort.merge(arr,'nim',true),lo=0,hi=sorted.length-1,t=nim.trim();while(lo<=hi){var mid=(lo+hi)>>1;if(sorted[mid].nim===t)return sorted[mid];sorted[mid].nim<t?lo=mid+1:hi=mid-1;}return null;},
+  byIPK:function(arr,mn,mx){return arr.filter(function(m){return m.ipk>=mn&&m.ipk<=mx;});}
+};
+
+// ── PANEL ────────────────────────────────────────────────────────────────────
+var editNim=null,curAlgo='bubble',sMode='linear',mCb=null;
+
+function gP(id,navEl) {
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.nav-it').forEach(function(n){n.classList.remove('active');});
+  if(navEl)navEl.classList.add('active');
+  var titles={dashboard:'Dashboard',daftar:'Daftar Mahasiswa',tambah:editNim?'Edit Mahasiswa':'Tambah Mahasiswa',cari:'Pencarian Data',sort:'Pengurutan Data',tc:'Time Complexity'};
+  document.getElementById('pgtit').textContent = titles[id]||id;
+  if(id==='dashboard')rDash();
+  if(id==='daftar')rT();
+  if(id==='tambah'&&!editNim)resetForm();
+  if(id==='cari')initSearch();
+  if(id==='tc')showTC('crud');
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+function toast(type,msg) {
+  var w=document.getElementById('tw2'),el=document.createElement('div');
+  el.className='toast '+(type==='ok'?'tok':'ter');
+  el.innerHTML=(type==='ok'?'✅':'❌')+' '+msg;
+  w.appendChild(el);
+  setTimeout(function(){el.style.animation='tsOut .25s ease forwards';setTimeout(function(){el.remove();},250);},3000);
+}
+
+// ── MODAL ────────────────────────────────────────────────────────────────────
+function openM(title,msg,cb) {
+  document.getElementById('mt').textContent=title;
+  document.getElementById('mp').textContent=msg;
+  document.getElementById('ov').classList.add('show');
+  mCb=cb;
+  document.getElementById('mok').onclick=function(){if(mCb)mCb();closeM();};
+}
+function closeM(){document.getElementById('ov').classList.remove('show');}
+
+// ── DASHBOARD ────────────────────────────────────────────────────────────────
+function rDash() {
+  if(!DB.length){document.getElementById('sg').innerHTML='<div style="grid-column:1/-1;color:var(--tx3);padding:20px">Belum ada data.</div>';return;}
+  var ipks=DB.map(function(m){return m.ipk;}),avg=(ipks.reduce(function(a,b){return a+b;},0)/ipks.length).toFixed(2);
+  var jur={};DB.forEach(function(m){jur[m.jurusan]=(jur[m.jurusan]||0)+1;});
+  document.getElementById('sg').innerHTML=
+    '<div class="sc" style="--cc:var(--ac)"><div class="sc-ic">👥</div><div class="sc-lb">Total Mahasiswa</div><div class="sc-v">'+DB.length+'</div><div class="sc-s">terdaftar</div></div>'+
+    '<div class="sc" style="--cc:var(--tl)"><div class="sc-ic" style="color:var(--tl)">📈</div><div class="sc-lb">IPK Rata-rata</div><div class="sc-v">'+avg+'</div><div class="sc-s">dari 4.00</div></div>'+
+    '<div class="sc" style="--cc:var(--am)"><div class="sc-ic" style="color:var(--am)">🏆</div><div class="sc-lb">IPK Tertinggi</div><div class="sc-v">'+Math.max.apply(null,ipks).toFixed(2)+'</div><div class="sc-s">terbaik</div></div>'+
+    '<div class="sc" style="--cc:var(--co)"><div class="sc-ic" style="color:var(--co)">🏫</div><div class="sc-lb">Program Studi</div><div class="sc-v">'+Object.keys(jur).length+'</div><div class="sc-s">jurusan</div></div>';
+  var recent=DB.slice(-5).reverse();
+  document.getElementById('tb-rec').innerHTML=recent.map(function(m){var st=status(m.ipk);return '<tr><td class="nc">'+m.nim+'</td><td style="font-weight:500">'+m.nama+'</td><td>'+ib(m.ipk)+'</td><td><span class="badge '+st.c+'">'+st.l+'</span></td></tr>';}).join('');
+  var maxJ=Math.max.apply(null,Object.values(jur));
+  document.getElementById('jbar').innerHTML=Object.entries(jur).sort(function(a,b){return b[1]-a[1];}).slice(0,7).map(function(e){
+    var j=e[0],n=e[1];
+    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="font-size:11px;color:var(--tx3);width:115px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+j+'</div><div style="flex:1;height:7px;background:var(--bg4);border-radius:99px;overflow:hidden"><div style="height:100%;width:'+(n/maxJ*100).toFixed(0)+'%;background:linear-gradient(90deg,var(--ac3),var(--ac2));border-radius:99px"></div></div><div style="font-size:12px;font-family:var(--mo);color:var(--tx2);width:20px;text-align:right">'+n+'</div></div>';
+  }).join('');
+}
+
+// ── TABLE ────────────────────────────────────────────────────────────────────
+function rT() {
+  var q=(document.getElementById('tq').value||'').toLowerCase();
+  var k=document.getElementById('ts').value,asc=document.getElementById('td').value==='asc';
+  var data=q?DB.filter(function(m){return(m.nim+m.nama+m.jurusan+m.email).toLowerCase().indexOf(q)>=0;}):DB.slice();
+  data=Sort.merge(data,k,asc);
+  var tbody=document.getElementById('tbm'),empty=document.getElementById('tbe');
+  if(!data.length){tbody.innerHTML='';empty.style.display='block';document.getElementById('tbf').textContent='';return;}
+  empty.style.display='none';
+  document.getElementById('tbf').textContent='Menampilkan '+data.length+' dari '+DB.length+' mahasiswa';
+  tbody.innerHTML=data.map(function(m,i){
+    var st=status(m.ipk);
+    return '<tr><td style="color:var(--tx3)">'+(i+1)+'</td><td class="nc">'+m.nim+'</td><td style="font-weight:500">'+m.nama+'</td><td style="color:var(--tx2)">'+m.jurusan+'</td><td style="text-align:center">'+m.semester+'</td><td>'+ib(m.ipk)+'</td><td style="font-family:var(--mo);color:var(--tx3)">'+m.tahun_masuk+'</td><td><span class="badge '+st.c+'">'+st.l+'</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-sm" onclick="editM(\''+m.nim+'\')">✏</button><button class="btn btn-sm btn-d" onclick="hapus(\''+m.nim+'\')">🗑</button></div></td></tr>';
+  }).join('');
+}
+
+// ── FORM ─────────────────────────────────────────────────────────────────────
+function vf(field) {
+  var map={
+    nim    :{el:'fnim', er:'enim', fn:function(v){return RX.nim.test(v.trim());}},
+    nama   :{el:'fnam', er:'enam', fn:function(v){return RX.nama.test(v.trim());}},
+    ipk    :{el:'fipk', er:'eipk', fn:function(v){var n=parseFloat(v);return RX.ipk.test(v.trim())&&!isNaN(n)&&n>=0&&n<=4;}},
+    telp   :{el:'ftelp',er:'etelp',fn:function(v){return RX.telp.test(v.trim());}},
+    email  :{el:'feml', er:'eeml', fn:function(v){return RX.email.test(v.trim());}},
+    tahun  :{el:'ftah', er:'etah', fn:function(v){var n=parseInt(v);return RX.tahun.test(v.trim())&&n>=2000&&n<=2025;}},
+    jurusan:{el:'fjur', er:'ejur', fn:function(v){return v.trim()!=='';}},
+    semester:{el:'fsem',er:'esem', fn:function(v){return v.trim()!=='';}}
+  };
+  var r=map[field];if(!r)return true;
+  var val=document.getElementById(r.el).value,ok=r.fn(val),inp=document.getElementById(r.el);
+  if(inp.type!=='select-one'){inp.classList.toggle('ok',ok&&val.trim()!=='');inp.classList.toggle('inv',!ok&&val.trim()!=='');}
+  document.getElementById(r.er).textContent=ok?'':(ERRS[field]||'Tidak valid');
+  return ok;
+}
+function valAll(){return['nim','nama','ipk','telp','email','tahun','jurusan','semester'].every(function(f){return vf(f);});}
+
+function submitForm() {
+  if(!valAll()){toast('err','Perbaiki input yang tidak valid.');return;}
+  var data={
+    nim:document.getElementById('fnim').value.trim(),
+    nama:document.getElementById('fnam').value.trim(),
+    jurusan:document.getElementById('fjur').value,
+    semester:parseInt(document.getElementById('fsem').value),
+    ipk:parseFloat(document.getElementById('fipk').value),
+    tahun_masuk:parseInt(document.getElementById('ftah').value),
+    telepon:document.getElementById('ftelp').value.trim(),
+    email:document.getElementById('feml').value.trim().toLowerCase(),
+    tgl_daftar: new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})
+  };
+  if(editNim) {
+    var idx=DB.findIndex(function(x){return x.nim===editNim;});
+    if(idx!==-1){data.nim=editNim;data.tgl_daftar=DB[idx].tgl_daftar;DB[idx]=data;simpan();updMeta();toast('ok','Data berhasil diperbarui!');editNim=null;document.getElementById('fnim').disabled=false;document.getElementById('btsub').innerHTML='💾 Simpan';gP('daftar',null);}
+  } else {
+    if(DB.find(function(x){return x.nim===data.nim;})){toast('err','NIM '+data.nim+' sudah terdaftar!');return;}
+    DB.push(data);simpan();updMeta();toast('ok','Mahasiswa '+data.nama+' ditambahkan!');resetForm();
+  }
+}
+
+function resetForm() {
+  ['fnim','fnam','fipk','ftelp','feml','ftah'].forEach(function(id){var el=document.getElementById(id);el.value='';el.classList.remove('ok','inv');el.disabled=false;});
+  ['fjur','fsem'].forEach(function(id){document.getElementById(id).selectedIndex=0;});
+  ['enim','enam','eipk','etelp','eeml','etah','ejur','esem'].forEach(function(id){document.getElementById(id).textContent='';});
+  ['alok','aler'].forEach(function(id){document.getElementById(id).classList.remove('show');});
+  editNim=null;document.getElementById('btsub').innerHTML='💾 Simpan';
+}
+function gTambah(){editNim=null;resetForm();gP('tambah',null);}
+function editM(nim) {
+  var m=DB.find(function(x){return x.nim===nim;});if(!m)return;
+  editNim=nim;
+  document.getElementById('fnim').value=m.nim;document.getElementById('fnim').disabled=true;
+  document.getElementById('fnam').value=m.nama;document.getElementById('fjur').value=m.jurusan;
+  document.getElementById('fsem').value=m.semester;document.getElementById('fipk').value=m.ipk;
+  document.getElementById('ftah').value=m.tahun_masuk;document.getElementById('ftelp').value=m.telepon;
+  document.getElementById('feml').value=m.email;
+  document.getElementById('btsub').innerHTML='💾 Update';
+  gP('tambah',null);
+}
+function hapus(nim) {
+  var m=DB.find(function(x){return x.nim===nim;});if(!m)return;
+  openM('Hapus Mahasiswa','Yakin hapus '+m.nama+' ('+nim+')? Tidak bisa dibatalkan.',function(){
+    DB=DB.filter(function(x){return x.nim!==nim;});simpan();updMeta();toast('ok','Mahasiswa '+m.nama+' dihapus.');rT();rDash();
+  });
+}
+
+// ── CSV EXPORT ───────────────────────────────────────────────────────────────
+function expCSV() {
+  var h='NIM,Nama,Jurusan,Semester,IPK,Tahun Masuk,Telepon,Email\n';
+  var rows=DB.map(function(m){return m.nim+','+m.nama+','+m.jurusan+','+m.semester+','+parseFloat(m.ipk).toFixed(2)+','+m.tahun_masuk+','+m.telepon+','+m.email;}).join('\n');
+  var b=new Blob([h+rows],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='mahasiswa_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(a.href);
+  toast('ok','Data diekspor ke CSV!');
+}
+
+// ── PENCARIAN ────────────────────────────────────────────────────────────────
+var sDescs={
+  linear    :'<b>Linear Search</b> &mdash; menelusuri semua data dari awal ke akhir. Partial match. Urutan bebas.<br><b>Time Complexity: O(n)</b> &mdash; Best O(1) | Worst O(n)',
+  sequential:'<b>Sequential Search</b> &mdash; exact match NIM satu per satu. Tidak butuh urutan.<br><b>Time Complexity: O(n)</b> &mdash; Best O(1) | Worst O(n)',
+  binary    :'<b>Binary Search</b> &mdash; bagi dua setiap langkah. Data diurutkan Merge Sort dulu.<br><b>Time Complexity: O(log n)</b> setelah sort O(n log n)',
+  ipk       :'<b>Rentang IPK</b> &mdash; filter linear berdasarkan rentang nilai IPK.<br><b>Time Complexity: O(n)</b>',
+};
+var sInputs={
+  linear    :'<input type="text" id="sq" placeholder="Kata kunci..."><select id="sf"><option value="nama">Cari: Nama</option><option value="jurusan">Cari: Jurusan</option><option value="email">Cari: Email</option><option value="nim">Cari: NIM</option></select>',
+  sequential:'<input type="text" id="sn" placeholder="NIM (8 digit)" maxlength="8">',
+  binary    :'<input type="text" id="sn2" placeholder="NIM (8 digit)" maxlength="8">',
+  ipk       :'<input type="number" id="smn" placeholder="IPK min" min="0" max="4" step="0.01" style="max-width:140px"><input type="number" id="smx" placeholder="IPK max" min="0" max="4" step="0.01" style="max-width:140px">',
+};
+function initSearch(){setMode('linear');}
+function setMode(m) {
+  sMode=m;
+  document.querySelectorAll('.mb').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('mb-'+m).classList.add('active');
+  document.getElementById('sdsc').innerHTML=sDescs[m];
+  document.getElementById('sinp').innerHTML=sInputs[m];
+  document.getElementById('rbox').innerHTML='<div style="text-align:center;padding:20px;color:var(--tx3)"><div style="font-size:28px;margin-bottom:8px">🔍</div>Hasil pencarian akan tampil di sini</div>';
+}
+function doSearch() {
+  var t0=performance.now(),found=[];
+  if(sMode==='linear'){var q=document.getElementById('sq').value,f=document.getElementById('sf').value;if(!q.trim()){toast('err','Isi kata kunci!');return;}found=Search.linear(DB,q,f);}
+  else if(sMode==='sequential'){var nim=document.getElementById('sn').value;if(!RX.nim.test(nim.trim())){toast('err','NIM harus 8 digit.');return;}var r=Search.sequential(DB,nim);found=r?[r]:[];}
+  else if(sMode==='binary'){var nim=document.getElementById('sn2').value;if(!RX.nim.test(nim.trim())){toast('err','NIM harus 8 digit.');return;}var r=Search.binary(DB,nim);found=r?[r]:[];}
+  else{var mn=parseFloat(document.getElementById('smn').value)||0,mx=parseFloat(document.getElementById('smx').value)||4;found=Search.byIPK(DB,mn,mx);}
+  var ms=(performance.now()-t0).toFixed(3);rRes(found,ms);
+}
+function rRes(found,ms) {
+  var box=document.getElementById('rbox');
+  if(!found.length){box.innerHTML='<div class="rm">Waktu: '+ms+' ms | n='+DB.length+'</div><div style="text-align:center;padding:24px;color:var(--tx3)"><div style="font-size:28px;margin-bottom:8px">😔</div>Tidak ditemukan</div>';return;}
+  box.innerHTML='<div class="rm">Ditemukan: <b style="color:var(--ac2)">'+found.length+'</b> | Waktu: '+ms+' ms | n='+DB.length+'</div>'+
+  found.map(function(m){
+    var st=status(m.ipk);
+    return '<div class="rc"><div class="rch"><div style="width:36px;height:36px;border-radius:10px;background:rgba(124,106,247,.15);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--ac2)">'+m.nama.charAt(0)+'</div><div><div style="font-weight:600">'+m.nama+'</div><div style="font-size:12px;color:var(--tx3);font-family:var(--mo)">'+m.nim+'</div></div><div style="margin-left:auto"><span class="badge '+st.c+'">'+st.l+'</span></div></div>'+
+    '<div class="rdg"><div class="di"><div class="dl">Jurusan</div><div class="dv">'+m.jurusan+'</div></div><div class="di"><div class="dl">Semester</div><div class="dv">'+m.semester+'</div></div><div class="di"><div class="dl">IPK</div><div class="dv">'+parseFloat(m.ipk).toFixed(2)+'</div></div><div class="di"><div class="dl">Tahun</div><div class="dv">'+m.tahun_masuk+'</div></div><div class="di"><div class="dl">Telepon</div><div class="dv" style="font-family:var(--mo)">'+m.telepon+'</div></div><div class="di"><div class="dl">Email</div><div class="dv">'+m.email+'</div></div></div></div>';
+  }).join('');
+}
+
+// ── SORT UI ───────────────────────────────────────────────────────────────────
+var sNames={bubble:'Bubble Sort',insertion:'Insertion Sort',selection:'Selection Sort',merge:'Merge Sort',shell:'Shell Sort'};
+var sCmp={bubble:'O(n²)',insertion:'O(n²)',selection:'O(n²)',merge:'O(n log n)',shell:'O(n^1.5)'};
+function selA(el,algo){document.querySelectorAll('.ac').forEach(function(c){c.classList.remove('sel');});el.classList.add('sel');curAlgo=algo;}
+function doSort() {
+  var k=document.getElementById('sk').value,asc=document.getElementById('sdir').value==='asc';
+  var t0=performance.now(),sorted=Sort[curAlgo](DB.slice(),k,asc),ms=(performance.now()-t0).toFixed(3);
+  document.getElementById('bwrap').style.display='none';
+  document.getElementById('sres').innerHTML=
+    '<div style="font-size:12px;color:var(--tx2);margin-bottom:10px;display:flex;gap:12px;flex-wrap:wrap">'+
+    '<span>🔄 '+sNames[curAlgo]+'</span>'+
+    '<span style="color:var(--tx3)">Kunci: <b style="color:var(--ac2)">'+k+'</b></span>'+
+    '<span style="color:var(--tx3)">Complexity: <b style="color:var(--am);font-family:var(--mo)">'+sCmp[curAlgo]+'</b></span>'+
+    '<span style="color:var(--tx3)">Waktu: <b style="color:var(--gr);font-family:var(--mo)">'+ms+' ms</b></span></div>'+
+    '<div class="card"><div class="tw"><table><thead><tr><th>#</th><th>NIM</th><th>Nama</th><th>Jurusan</th><th>Sem</th><th>IPK</th></tr></thead><tbody>'+
+    sorted.map(function(m,i){return '<tr><td style="color:var(--tx3)">'+(i+1)+'</td><td class="nc">'+m.nim+'</td><td style="font-weight:500">'+m.nama+'</td><td style="color:var(--tx2)">'+m.jurusan+'</td><td style="text-align:center">'+m.semester+'</td><td>'+parseFloat(m.ipk).toFixed(2)+'</td></tr>';}).join('')+
+    '</tbody></table></div></div>';
+}
+function doBench() {
+  document.getElementById('sres').innerHTML='';
+  var k=document.getElementById('sk').value,asc=document.getElementById('sdir').value==='asc';
+  var order=['bubble','insertion','selection','shell','merge'],res={};
+  order.forEach(function(algo){
+    var runs=[];for(var i=0;i<6;i++){var t0=performance.now();Sort[algo](DB.slice(),k,asc);runs.push(performance.now()-t0);}
+    res[algo]=runs.reduce(function(a,b){return a+b;},0)/runs.length;
+  });
+  var mx=Math.max.apply(null,Object.values(res));
+  document.getElementById('bnn').textContent=DB.length;
+  document.getElementById('bbars').innerHTML=order.map(function(a){
+    var ms=res[a],pct=(ms/mx*100).toFixed(0),fast=a==='merge'||a==='shell';
+    return '<div class="br"><div class="bn">'+sNames[a]+'</div><div class="bw2"><div class="bb'+(fast?' fast':'')+'" style="width:'+pct+'%"></div></div><div class="bti">'+ms.toFixed(3)+' ms</div></div>';
+  }).join('');
+  document.getElementById('bwrap').style.display='block';
+}
+
+// ── TIME COMPLEXITY ───────────────────────────────────────────────────────────
+var TCD={
+  crud:{cols:['Operasi','Best','Average','Worst','Space'],rows:[['Tambah','O(n)','O(n)','O(n)','O(1)'],['Lihat semua','O(1)','O(1)','O(1)','O(n)'],['Cari NIM','O(1)','O(n)','O(n)','O(1)'],['Edit data','O(1)','O(n)','O(n)','O(1)'],['Hapus data','O(1)','O(n)','O(n)','O(1)'],['Statistik','O(n)','O(n)','O(n)','O(1)']]},
+  search:{cols:['Algoritma','Best','Average','Worst','Keterangan'],rows:[['Linear Search','O(1)','O(n)','O(n)','Partial, bebas urutan'],['Sequential Search','O(1)','O(n)','O(n)','Exact NIM, bebas'],['Binary Search','O(1)','O(log n)','O(log n)','Data HARUS terurut'],['+ Merge Sort (prep)','O(n log n)','O(n log n)','O(n log n)','Sort sebelum binary'],['Rentang IPK','O(n)','O(n)','O(n)','Filter range']]},
+  sort:{cols:['Algoritma','Best','Average','Worst','Space'],rows:[['Bubble Sort','O(n)','O(n²)','O(n²)','O(1)'],['Insertion Sort','O(n)','O(n²)','O(n²)','O(1)'],['Selection Sort','O(n²)','O(n²)','O(n²)','O(1)'],['Merge Sort','O(n log n)','O(n log n)','O(n log n)','O(n)'],['Shell Sort','O(n log n)','O(n^1.5)','O(n²)','O(1)']]},
+  io:{cols:['Operasi','Best','Average','Worst','Keterangan'],rows:[['Simpan localStorage','O(n)','O(n)','O(n)','Serialize JSON'],['Muat localStorage','O(n)','O(n)','O(n)','Parse JSON'],['Ekspor CSV','O(n)','O(n)','O(n)','Build string'],['Validasi Regex','O(m)','O(m)','O(m)','m=panjang input'],['Tulis log','O(1)','O(1)','O(1)','Append']]}
+};
+function tcC(v){if(!v.startsWith('O('))return'';if(v.indexOf('n²')>=0)return'tc-bd';if(v==='O(1)'||v.indexOf('log n')>=0)return'tc-gd';return'tc-md';}
+function showTC(tab) {
+  document.querySelectorAll('.tc-tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('tct-'+tab).classList.add('active');
+  var d=TCD[tab];
+  document.getElementById('tcc').innerHTML='<table class="tc-t"><thead><tr>'+d.cols.map(function(c){return'<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>'+
+    d.rows.map(function(row){return'<tr>'+row.map(function(cell,ci){return'<td class="'+(ci>=1&&ci<=3?tcC(cell):'')+'">'+cell+'</td>';}).join('')+'</tr>';}).join('')+
+  '</tbody></table>';
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.getElementById('l-user').focus();
+</script>
+</body>
+</html>
